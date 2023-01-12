@@ -22,7 +22,7 @@ class SelectionCell: UITableViewCell, ZJCellProtocol {
     @IBOutlet var titleL: UILabel!
 
     func cellPrepared() {
-        titleL.text = "Item \(item.indexPath.row)"
+        titleL.text = "Item \(item.indexPath?.row ?? 0)"
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

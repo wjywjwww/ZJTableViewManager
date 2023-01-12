@@ -12,16 +12,12 @@ public typealias ZJTableViewSectionBlock = (ZJTableViewSection) -> Void
 
 open class ZJTableViewSection: NSObject {
     private weak var _tableViewManager: ZJTableViewManager?
-    public var tableViewManager: ZJTableViewManager {
+    public var tableViewManager: ZJTableViewManager? {
         set {
             _tableViewManager = newValue
         }
         get {
-            guard let tableViewManager = _tableViewManager else {
-                zj_log("Please add section to manager")
-                fatalError()
-            }
-            return tableViewManager
+            return _tableViewManager
         }
     }
 
@@ -42,8 +38,8 @@ open class ZJTableViewSection: NSObject {
         headerDidEndDisplayHandler = block
     }
 
-    public var index: Int {
-        return tableViewManager.sections.zj_indexOf(self)
+    public var index: Int? {
+        return tableViewManager?.sections.zj_indexOf(self)
     }
 
     override public init() {
@@ -118,12 +114,15 @@ open class ZJTableViewSection: NSObject {
             zj_log("can't insert because afterItem did not in sections")
             return
         }
-
-        tableViewManager.tableView.beginUpdates()
-        item.section = self
-        items.insert(item, at: items.zj_indexOf(afterItem) + 1)
-        tableViewManager.tableView.insertRows(at: [item.indexPath], with: animate)
-        tableViewManager.tableView.endUpdates()
+        if let tableViewManager = tableViewManager {
+            tableViewManager.tableView.beginUpdates()
+            item.section = self
+            items.insert(item, at: items.zj_indexOf(afterItem) + 1)
+            if let indexPath = item.indexPath {
+                tableViewManager.tableView.insertRows(at: [indexPath], with: animate)
+            }
+            tableViewManager.tableView.endUpdates()
+        }
     }
 
     public func insert(_ items: [ZJTableViewItem], afterItem: ZJTableViewItem, animate: UITableView.RowAnimation = .automatic) {
@@ -131,36 +130,45 @@ open class ZJTableViewSection: NSObject {
             zj_log("can't insert because afterItem did not in sections")
             return
         }
-
-        tableViewManager.tableView.beginUpdates()
-        let newFirstIndex = self.items.zj_indexOf(afterItem) + 1
-        self.items.insert(contentsOf: items, at: newFirstIndex)
-        var arrNewIndexPath = [IndexPath]()
-        for i in 0 ..< items.count {
-            items[i].section = self
-            arrNewIndexPath.append(IndexPath(item: newFirstIndex + i, section: afterItem.indexPath.section))
+        if let tableViewManager = tableViewManager {
+            tableViewManager.tableView.beginUpdates()
+            let newFirstIndex = self.items.zj_indexOf(afterItem) + 1
+            self.items.insert(contentsOf: items, at: newFirstIndex)
+            var arrNewIndexPath = [IndexPath]()
+            for i in 0 ..< items.count {
+                items[i].section = self
+                if let indexPath = afterItem.indexPath {
+                    arrNewIndexPath.append(IndexPath(item: newFirstIndex + i, section: indexPath.section))
+                }
+            }
+            tableViewManager.tableView.insertRows(at: arrNewIndexPath, with: animate)
+            tableViewManager.tableView.endUpdates()
         }
-        tableViewManager.tableView.insertRows(at: arrNewIndexPath, with: animate)
-        tableViewManager.tableView.endUpdates()
     }
 
     public func delete(_ itemsToDelete: [ZJTableViewItem], animate: UITableView.RowAnimation = .automatic) {
         guard itemsToDelete.count > 0 else { return }
-        tableViewManager.tableView.beginUpdates()
-        var arrNewIndexPath = [IndexPath]()
-        for i in itemsToDelete {
-            arrNewIndexPath.append(i.indexPath)
+        if let tableViewManager = tableViewManager {
+            tableViewManager.tableView.beginUpdates()
+            var arrNewIndexPath = [IndexPath]()
+            for i in itemsToDelete {
+                if let indexPath = i.indexPath {
+                    arrNewIndexPath.append(indexPath)
+                }
+            }
+            for i in itemsToDelete {
+                remove(item: i)
+            }
+            tableViewManager.tableView.deleteRows(at: arrNewIndexPath, with: animate)
+            tableViewManager.tableView.endUpdates()
         }
-        for i in itemsToDelete {
-            remove(item: i)
-        }
-        tableViewManager.tableView.deleteRows(at: arrNewIndexPath, with: animate)
-        tableViewManager.tableView.endUpdates()
     }
 
     public func reload(_ animation: UITableView.RowAnimation) {
         // If crash at here, section did not in manager！
-        let index = tableViewManager.sections.zj_indexOf(self)
-        tableViewManager.tableView.reloadSections(IndexSet(integer: index), with: animation)
+        if let tableViewManager = tableViewManager {
+            let index = tableViewManager.sections.zj_indexOf(self)
+            tableViewManager.tableView.reloadSections(IndexSet(integer: index), with: animation)
+        }
     }
 }

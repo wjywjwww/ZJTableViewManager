@@ -82,13 +82,15 @@ class ExpandTreeViewController: UIViewController {
             }
 
             // 模拟网络请求
-            httpRequest(view: callBackItem.cell.contentView) { [unowned self] in
-                // 网络请求完成 添加数据
-                for _ in 0 ..< 3 {
-                    let newItem = Level1CellItem()
-                    callBackItem.addSub(item: newItem, section: self.section)
+            if let cell = callBackItem.cell {
+                httpRequest(view: cell.contentView) { [unowned self] in
+                    // 网络请求完成 添加数据
+                    for _ in 0 ..< 3 {
+                        let newItem = Level1CellItem()
+                        callBackItem.addSub(item: newItem, section: self.section)
+                    }
+                    callBackItem.toggleExpand()
                 }
-                callBackItem.toggleExpand()
             }
         }
     }
@@ -122,13 +124,15 @@ class ExpandTreeViewController: UIViewController {
             }
 
             // 模拟网络请求
-            httpRequest(view: callBackItem.cell.contentView) { [unowned self] in
-                // 网络请求完成 添加数据
-                for _ in 0 ..< 3 {
-                    let newItem = Level1CellItem()
-                    callBackItem.addSub(item: newItem, section: self.section)
+            if let cell = callBackItem.cell {
+                httpRequest(view: cell.contentView) { [unowned self] in
+                    // 网络请求完成 添加数据
+                    for _ in 0 ..< 3 {
+                        let newItem = Level1CellItem()
+                        callBackItem.addSub(item: newItem, section: self.section)
+                    }
+                    callBackItem.toggleExpand()
                 }
-                callBackItem.toggleExpand()
             }
         }
     }

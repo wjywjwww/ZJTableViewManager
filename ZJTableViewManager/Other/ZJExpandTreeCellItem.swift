@@ -76,32 +76,37 @@ open class ZJExpandTreeCellItem: ZJTableViewItem {
         // 删除需要计算旧的indexPath
         var deleteIndexPaths = [IndexPath]()
         for i in waitForDeleteItems {
-            deleteIndexPaths.append(i.indexPath)
+            if let indexPath = i.indexPath {
+                deleteIndexPaths.append(indexPath)
+            }
         }
-        
-        for i in waitForDeleteItems {
-            section.remove(item: i)
-        }
-        
-        // 插入需要计算新的indexPath
-        let newFirstIndex = section.items.zj_indexOf(self) + 1
-        section.items.insert(contentsOf: waitForInsertItems, at: newFirstIndex)
-        var insertIndexPaths = [IndexPath]()
-        for i in 0 ..< waitForInsertItems.count {
-            waitForInsertItems[i].section = section
-            insertIndexPaths.append(IndexPath(item: newFirstIndex + i, section: indexPath.section))
-        }
-        
-        tableVManager.tableView.beginUpdates()
-        if insertIndexPaths.count > 0 {
-            tableVManager.tableView.insertRows(at: insertIndexPaths, with: .fade)
-        }
+        if let section = section,
+           let tableVManager = tableVManager {
+            for i in waitForDeleteItems {
+                section.remove(item: i)
+            }
+            
+            // 插入需要计算新的indexPath
+            let newFirstIndex = section.items.zj_indexOf(self) + 1
+            section.items.insert(contentsOf: waitForInsertItems, at: newFirstIndex)
+            var insertIndexPaths = [IndexPath]()
+            for i in 0 ..< waitForInsertItems.count {
+                waitForInsertItems[i].section = section
+                if let indexPath = indexPath {
+                    insertIndexPaths.append(IndexPath(item: newFirstIndex + i, section: indexPath.section))
+                }
+            }
+            
+            tableVManager.tableView.beginUpdates()
+            if insertIndexPaths.count > 0 {
+                tableVManager.tableView.insertRows(at: insertIndexPaths, with: .fade)
+            }
 
-        if deleteIndexPaths.count > 0 {
-            tableVManager.tableView.deleteRows(at: deleteIndexPaths, with: .fade)
+            if deleteIndexPaths.count > 0 {
+                tableVManager.tableView.deleteRows(at: deleteIndexPaths, with: .fade)
+            }
+            tableVManager.tableView.endUpdates()
         }
-        tableVManager.tableView.endUpdates()
-        
         didExpand?(self)
         zj_log(isExpand ? "展开" : "收起")
 

@@ -11,18 +11,17 @@ import UIKit
 public typealias ZJTableViewItemBlock = (ZJTableViewItem) -> Void
 
 open class ZJTableViewItem: NSObject {
-    public var tableVManager: ZJTableViewManager {
-        return section.tableViewManager
+    public var tableVManager: ZJTableViewManager? {
+        return section?.tableViewManager
     }
 
     private weak var _section: ZJTableViewSection?
-    public var section: ZJTableViewSection {
+    public var section: ZJTableViewSection? {
         set {
             _section = newValue
         }
         get {
-            guard let s = _section else { fatalError() }
-            return s
+            return _section
         }
     }
 
@@ -57,22 +56,26 @@ open class ZJTableViewItem: NSObject {
     public var editingStyle: UITableViewCell.EditingStyle = .none
     public var accessoryView: UIView?
     public var isSelected: Bool {
-        return cell.isSelected
+        return cell?.isSelected ?? false
     }
     public var isAllowSelect: Bool = true
 
-    public var indexPath: IndexPath {
-        let rowIndex = self.section.items.zj_indexOf(self)
-        let section = tableVManager.sections.zj_indexOf(self.section)
-        return IndexPath(item: rowIndex, section: section)
+    public var indexPath: IndexPath? {
+        if let section = self.section,
+           let rowIndex = self.section?.items.zj_indexOf(self),
+           let section = self.tableVManager?.sections.zj_indexOf(section){
+            return IndexPath(item: rowIndex, section: section)
+        } else {
+            return nil
+        }
     }
 
-    public var cell: UITableViewCell {
-        if let unwrappedCell = tableVManager.tableView.cellForRow(at: indexPath) {
-            return unwrappedCell
+    public var cell: UITableViewCell? {
+        if let indexPath = indexPath {
+            return tableVManager?.tableView.cellForRow(at: indexPath)
+        } else {
+            return nil
         }
-        zj_log("You didn't get that cell, so you have to get that cell after tableView is reload. Or the cell that gets the indexPath has to be on the screen, you can't get the cell that's off the screen")
-        fatalError()
     }
 
     override public init() {
@@ -87,30 +90,42 @@ open class ZJTableViewItem: NSObject {
     }
 
     public func reload(_ animation: UITableView.RowAnimation) {
-        zj_log("reload tableview at \(indexPath)")
-        tableVManager.tableView.beginUpdates()
-        tableVManager.tableView.reloadRows(at: [indexPath], with: animation)
-        tableVManager.tableView.endUpdates()
+        if let indexPath = indexPath,
+           let tableVManager = tableVManager{
+            zj_log("reload tableview at \(indexPath)")
+            tableVManager.tableView.beginUpdates()
+            tableVManager.tableView.reloadRows(at: [indexPath], with: animation)
+            tableVManager.tableView.endUpdates()
+        }
     }
 
     public func select(animated: Bool = true, scrollPosition: UITableView.ScrollPosition = .none) {
-        if isAllowSelect {
-            tableVManager.tableView.selectRow(at: indexPath, animated: animated, scrollPosition: scrollPosition)
+        if let tableVManager = tableVManager {
+            if isAllowSelect {
+                tableVManager.tableView.selectRow(at: indexPath, animated: animated, scrollPosition: scrollPosition)
+            }
         }
     }
 
     public func deselect(animated: Bool = true) {
-        tableVManager.tableView.deselectRow(at: indexPath, animated: animated)
+        if let indexPath = indexPath,
+           let tableVManager = tableVManager{
+            tableVManager.tableView.deselectRow(at: indexPath, animated: animated)
+        }
     }
 
     public func delete(_ animation: UITableView.RowAnimation = .automatic) {
-        if !section.items.contains(where: { $0 == self }) {
-            zj_log("can't delete because this item did not in section")
-            return
+        if let indexPath = indexPath,
+           let section = section,
+           let tableVManager = tableVManager{
+            if !section.items.contains(where: { $0 == self }) {
+                zj_log("can't delete because this item did not in section")
+                return
+            }
+            section.items.remove(at: indexPath.row)
+            tableVManager.tableView.deleteRows(at: [indexPath], with: animation)
         }
-        let indexPath = self.indexPath
-        section.items.remove(at: indexPath.row)
-        tableVManager.tableView.deleteRows(at: [indexPath], with: animation)
+        
     }
 
     /// 计算cell高度
