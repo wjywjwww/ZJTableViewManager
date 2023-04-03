@@ -54,6 +54,7 @@ open class ZJTableViewItem: NSObject {
     public var accessoryType: UITableViewCell.AccessoryType = .none
     public var selectionStyle: UITableViewCell.SelectionStyle = .default
     public var editingStyle: UITableViewCell.EditingStyle = .none
+    public var canEdit:Bool = true
     public var accessoryView: UIView?
     public var isSelected: Bool {
         return cell?.isSelected ?? false

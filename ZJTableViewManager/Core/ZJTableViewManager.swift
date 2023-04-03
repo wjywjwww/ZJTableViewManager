@@ -128,6 +128,11 @@ open class ZJTableViewManager: NSObject {
 
 extension ZJTableViewManager: UITableViewDelegate {
     
+    public func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        let (_,item) = getSectionAndItem(indexPath: (section: indexPath.section, row: indexPath.row))
+        return item.canEdit
+    }
+    
     public func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         let obj = getSectionAndItem(indexPath: (section: indexPath.section, row: indexPath.row))
         if obj.item.isAllowSelect {
