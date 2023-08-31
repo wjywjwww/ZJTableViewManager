@@ -26,7 +26,8 @@ open class ZJTableViewManager: NSObject {
     var defaultTableViewSectionHeight: CGFloat {
         return tableView.style == .grouped ? 44 : 0
     }
-
+    var cellForRowBlock:(IndexPath) -> Void = { _ in }
+    
     public func selectedItem<T: ZJTableViewItem>() -> T? {
         if let item = selectedItems().first {
             return item as? T
@@ -279,6 +280,7 @@ extension ZJTableViewManager: UITableViewDataSource {
         unwrappedCell.selectionStyle = item.selectionStyle
         unwrappedCell._item = item
         unwrappedCell.cellPrepared()
+        self.cellForRowBlock(indexPath)
         return unwrappedCell
     }
 }
