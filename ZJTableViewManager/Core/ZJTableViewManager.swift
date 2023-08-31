@@ -23,10 +23,11 @@ open class ZJTableViewManager: NSObject {
     public weak var scrollDelegate: ZJTableViewScrollDelegate?
     public var tableView: UITableView!
     public var sections: [ZJTableViewSection] = []
+    public var cellForRowBlock:(IndexPath) -> Void = { _ in }
     var defaultTableViewSectionHeight: CGFloat {
         return tableView.style == .grouped ? 44 : 0
     }
-    var cellForRowBlock:(IndexPath) -> Void = { _ in }
+    
     
     public func selectedItem<T: ZJTableViewItem>() -> T? {
         if let item = selectedItems().first {
