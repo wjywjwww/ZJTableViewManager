@@ -23,7 +23,7 @@ open class ZJTableViewManager: NSObject {
     public weak var scrollDelegate: ZJTableViewScrollDelegate?
     public var tableView: UITableView!
     public var sections: [ZJTableViewSection] = []
-    public var cellForRowBlock:(IndexPath) -> Void = { _ in }
+    public var cellForRowBlock:(IndexPath,UITableViewCell) -> Void = { _,_ in }
     var defaultTableViewSectionHeight: CGFloat {
         return tableView.style == .grouped ? 44 : 0
     }
@@ -281,7 +281,7 @@ extension ZJTableViewManager: UITableViewDataSource {
         unwrappedCell.selectionStyle = item.selectionStyle
         unwrappedCell._item = item
         unwrappedCell.cellPrepared()
-        self.cellForRowBlock(indexPath)
+        self.cellForRowBlock(indexPath,unwrappedCell)
         return unwrappedCell
     }
 }
