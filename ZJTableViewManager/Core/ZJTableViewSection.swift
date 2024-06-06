@@ -145,6 +145,24 @@ open class ZJTableViewSection: NSObject {
             tableViewManager.tableView.endUpdates()
         }
     }
+    
+    public func insert(_ items: [ZJTableViewItem], insertIndexPath:IndexPath, animate: UITableView.RowAnimation = .automatic) {
+        if self.items.count > 0 {
+            zj_log("can't insert because section is empty")
+            return
+        }
+        if let tableViewManager = tableViewManager {
+            tableViewManager.tableView.beginUpdates()
+            self.items.insert(contentsOf: items, at: insertIndexPath.row)
+            var arrNewIndexPath = [IndexPath]()
+            for i in 0 ..< items.count {
+                items[i].section = self
+                arrNewIndexPath.append(IndexPath(item: insertIndexPath.row + i, section: insertIndexPath.section))
+            }
+            tableViewManager.tableView.insertRows(at: arrNewIndexPath, with: animate)
+            tableViewManager.tableView.endUpdates()
+        }
+    }
 
     public func delete(_ itemsToDelete: [ZJTableViewItem], animate: UITableView.RowAnimation = .automatic) {
         guard itemsToDelete.count > 0 else { return }
