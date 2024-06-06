@@ -147,7 +147,7 @@ open class ZJTableViewSection: NSObject {
     }
     
     public func insert(_ items: [ZJTableViewItem], insertIndexPath:IndexPath, animate: UITableView.RowAnimation = .automatic) {
-        if self.items.count > 0 {
+        if self.items.count < 1 {
             zj_log("can't insert because section is empty")
             return
         }
